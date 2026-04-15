@@ -1,8 +1,8 @@
 import { AppDataSource } from "../data-source";
-import { User } from "../entity/User";
+import { User } from "../entities/User";
 import type { Request, Response } from "express";
 
-export class userController {
+export class UserController {
   private userRepository = AppDataSource.getRepository(User);
 
   async create(req: Request, res: Response) {
@@ -25,6 +25,7 @@ export class userController {
   async list(req: Request, res: Response) {
     try {
       const users = await this.userRepository.find();
+
       return res.status(200).json(users);
     } catch (error: unknown) {
       if (error instanceof Error) {

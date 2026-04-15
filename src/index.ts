@@ -1,27 +1,19 @@
 import "reflect-metadata";
+import express, { type Application } from "express";
 import { AppDataSource } from "./data-source";
-import { User } from "./entity/User";
+import { userRouter } from "./routes/userRoutes";
 
-async function main() {
-  try {
-    await AppDataSource.initialize();
-    console.log("banco conectado");
+const app: Application = express();
+const port = process.env.PORT;
 
-    const userRepository = AppDataSource.getRepository(User);
+app.use(express.json());
+app.use("/api/users", userRouter);
 
-    const newUser = userRepository.create({
-      firstName: "Pedro",
-      lastName: "Paula",
+AppDataSource.initialize()
+  .then(() => {
+    console.log("Banco conectado");
+    app.listen(port, () => {
+      console.log(`http://localhost:${port}`);
     });
-
-    await userRepository.save(newUser);
-
-    const allUsers = await userRepository.find();
-
-    console.log(`Usuários cadastrados: `, allUsers);
-  } catch (error) {
-    console.log(`Erro: ${error}`);
-  }
-}
-
-main();
+  })
+  .catch((error) => console.log("Erro ao conectar ao banco", error));
