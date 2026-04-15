@@ -6,5 +6,7 @@ const userController = new UserController();
 
 router.post("/", (req, res) => userController.create(req, res));
 router.get("/", (req, res) => userController.list(req, res));
+router.delete("/:id", (req, res) => userController.deletar(req, res));
+router.put("/:id", (req, res) => userController.update(req, res));
 
 export const userRouter = router;

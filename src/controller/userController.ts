@@ -37,4 +37,61 @@ export class UserController {
         .json({ message: "Ocorreu um erro ao listar os usuários" });
     }
   }
+
+  async deletar(req: Request, res: Response) {
+    try {
+      const id: number = Number(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "ID inválido" });
+      }
+
+      const result = await this.userRepository.delete(id);
+      if (result.affected === 0) {
+        return res.status(404).json({ message: "Usuário não foi encontrado" });
+      }
+
+      return res.status(204).send();
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      return res
+        .status(500)
+        .json({ message: "Ocorreu um erro inesperado ao deletar o usuário" });
+    }
+  }
+
+  async update(req: Request, res: Response) {
+    try {
+      const id: number = Number(req.params.id);
+      const { firstName, lastName } = req.body;
+
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "ID inválido" });
+      }
+
+      if (!firstName || !lastName) {
+        return res
+          .status(400)
+          .json({ message: "insira todos os dados para atualizar o usuário" });
+      }
+
+      const updUser = {
+        firstName: firstName,
+        lastName: lastName,
+      };
+
+      await this.userRepository.update(id, updUser);
+      return res.status(200).json(updUser);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      return res
+        .status(500)
+        .json({ message: "Ocorreu um erro inesperado ao atualizar o usuário" });
+    }
+  }
 }
