@@ -79,11 +79,42 @@ export class UserController {
       const updUser = {
         firstName: updatedUser.firstName ?? user.firstName,
         lastName: updatedUser.lastName ?? user.lastName,
-        isActive: updatedUser.isActive ?? user.isActive,
       };
 
       await this.userRepository.update(id, updUser);
       return res.status(200).json(updUser);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      return res
+        .status(500)
+        .json({ message: "Ocorreu um erro inesperado ao atualizar o usuário" });
+    }
+  }
+
+  async toggleActive(req: Request, res: Response) {
+    try {
+      const id: number = Number(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "ID inválido" });
+      }
+
+      const user = await this.userRepository.findOneBy({ id });
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+
+      user.isActive = !user.isActive;
+      await this.userRepository.save(user);
+      return res
+        .status(200)
+        .json({
+          message: `Usuário ${
+            user.isActive ? "ativado" : "desativado"
+          } com sucesso`,
+        });
     } catch (error: unknown) {
       if (error instanceof Error) {
         return res.status(400).json({ error: error.message });
