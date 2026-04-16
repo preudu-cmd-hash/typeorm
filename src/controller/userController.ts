@@ -65,7 +65,7 @@ export class UserController {
   async update(req: Request, res: Response) {
     try {
       const id: number = Number(req.params.id);
-      const { firstName, lastName } = req.body;
+      const updatedUser = req.body;
 
       if (isNaN(id)) {
         return res.status(400).json({ message: "ID inválido" });
@@ -77,8 +77,9 @@ export class UserController {
       }
 
       const updUser = {
-        firstName: firstName ?? user.firstName,
-        lastName: lastName ?? user.lastName,
+        firstName: updatedUser.firstName ?? user.firstName,
+        lastName: updatedUser.lastName ?? user.lastName,
+        isActive: updatedUser.isActive ?? user.isActive,
       };
 
       await this.userRepository.update(id, updUser);
