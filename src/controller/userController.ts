@@ -108,13 +108,11 @@ export class UserController {
 
       user.isActive = !user.isActive;
       await this.userRepository.save(user);
-      return res
-        .status(200)
-        .json({
-          message: `Usuário ${
-            user.isActive ? "ativado" : "desativado"
-          } com sucesso`,
-        });
+      return res.status(200).json({
+        message: `Usuário ${
+          user.isActive ? "ativado" : "desativado"
+        } com sucesso`,
+      });
     } catch (error: unknown) {
       if (error instanceof Error) {
         return res.status(400).json({ error: error.message });
@@ -123,6 +121,21 @@ export class UserController {
       return res
         .status(500)
         .json({ message: "Ocorreu um erro inesperado ao atualizar o usuário" });
+    }
+  }
+
+  async listActive(req: Request, res: Response) {
+    try {
+      const users = await this.userRepository.findBy({ isActive: true });
+      return res.status(200).json(users);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      return res.status(500).json({
+        message: "Ocorreu um erro inesperado ao listar os usuários",
+      });
     }
   }
 }
