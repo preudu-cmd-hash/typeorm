@@ -71,15 +71,14 @@ export class UserController {
         return res.status(400).json({ message: "ID inválido" });
       }
 
-      if (!firstName || !lastName) {
-        return res
-          .status(400)
-          .json({ message: "insira todos os dados para atualizar o usuário" });
+      const user = await this.userRepository.findOneBy({ id });
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
       }
 
       const updUser = {
-        firstName: firstName,
-        lastName: lastName,
+        firstName: firstName ?? user.firstName,
+        lastName: lastName ?? user.lastName,
       };
 
       await this.userRepository.update(id, updUser);
