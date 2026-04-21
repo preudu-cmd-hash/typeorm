@@ -1,6 +1,7 @@
 import { AppDataSource } from "../data-source";
 import { User } from "../entities/User";
 import type { Request, Response } from "express";
+import { BadRequestError, NotFoundError } from "../helpers/apiError";
 
 export class UserController {
   private userRepository = AppDataSource.getRepository(User);
@@ -14,7 +15,7 @@ export class UserController {
       return res.status(201).json(newUser);
     } catch (error: unknown) {
       if (error instanceof Error) {
-        return res.status(400).json({ error: error.message });
+        throw new BadRequestError("Requisição inválida");
       }
       return res
         .status(500)
@@ -29,7 +30,7 @@ export class UserController {
       return res.status(200).json(users);
     } catch (error: unknown) {
       if (error instanceof Error) {
-        return res.status(400).json({ error: error.message });
+        throw new BadRequestError("Requisição inválida");
       }
 
       return res
@@ -42,18 +43,18 @@ export class UserController {
     try {
       const id: number = Number(req.params.id);
       if (isNaN(id)) {
-        return res.status(400).json({ message: "ID inválido" });
+        throw new BadRequestError("Requisição inválida");
       }
 
       const result = await this.userRepository.delete(id);
       if (result.affected === 0) {
-        return res.status(404).json({ message: "Usuário não foi encontrado" });
+        throw new NotFoundError("Usuário não encontrado");
       }
 
       return res.status(204).send();
     } catch (error: unknown) {
       if (error instanceof Error) {
-        return res.status(400).json({ error: error.message });
+        throw new BadRequestError("Requisição inválida");
       }
 
       return res
@@ -68,12 +69,12 @@ export class UserController {
       const updatedUser = req.body;
 
       if (isNaN(id)) {
-        return res.status(400).json({ message: "ID inválido" });
+        throw new BadRequestError("Requisição inválida");
       }
 
       const user = await this.userRepository.findOneBy({ id });
       if (!user) {
-        return res.status(404).json({ message: "Usuário não encontrado" });
+        throw new NotFoundError("Usuário não encontrado");
       }
 
       const updUser = {
@@ -85,7 +86,7 @@ export class UserController {
       return res.status(200).json(updUser);
     } catch (error: unknown) {
       if (error instanceof Error) {
-        return res.status(400).json({ error: error.message });
+        throw new BadRequestError("Requisição inválida");
       }
 
       return res
@@ -103,7 +104,7 @@ export class UserController {
 
       const user = await this.userRepository.findOneBy({ id });
       if (!user) {
-        return res.status(404).json({ message: "Usuário não encontrado" });
+        throw new NotFoundError("Usuário não encontrado");
       }
 
       user.isActive = !user.isActive;
@@ -115,7 +116,7 @@ export class UserController {
       });
     } catch (error: unknown) {
       if (error instanceof Error) {
-        return res.status(400).json({ error: error.message });
+        throw new BadRequestError("Requisição inválida");
       }
 
       return res
@@ -130,7 +131,7 @@ export class UserController {
       return res.status(200).json(users);
     } catch (error: unknown) {
       if (error instanceof Error) {
-        return res.status(400).json({ error: error.message });
+        throw new BadRequestError("Requisição inválida");
       }
 
       return res.status(500).json({

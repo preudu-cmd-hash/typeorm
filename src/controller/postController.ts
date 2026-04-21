@@ -2,6 +2,7 @@ import { AppDataSource } from "../data-source";
 import { Post } from "../entities/Posts";
 import { User } from "../entities/User";
 import type { Request, Response } from "express";
+import { BadRequestError, NotFoundError } from "../helpers/apiError";
 
 export class PostController {
   private postRepository = AppDataSource.getRepository(Post);
@@ -11,17 +12,16 @@ export class PostController {
     try {
       const { title, content, userId } = req.body;
       if (isNaN(userId)) {
-        res.json({ message: "Id do usuário inválido" });
+        throw new BadRequestError("Requisição inválida");
       }
       const user = await this.userRespository.findOneBy({ id: userId });
-      if (!user)
-        return res.status(404).json({ message: "Usuário não encontrado" });
+      if (!user) throw new NotFoundError("Usuário não encontrado");
 
       const post = this.postRepository.create({ title, content, user });
       await this.postRepository.save(post);
     } catch (error: unknown) {
       if (error instanceof Error) {
-        return res.status(400).json({ error: error.message });
+        throw new BadRequestError("Requisição inválida");
       }
 
       return res.status(500).json({
@@ -36,7 +36,7 @@ export class PostController {
       return res.status(200).json(posts);
     } catch (error: unknown) {
       if (error instanceof Error) {
-        return res.status(400).json({ error: error.message });
+        throw new BadRequestError("Requisição inválida");
       }
 
       return res.status(500).json({
