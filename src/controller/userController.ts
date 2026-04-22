@@ -1,6 +1,6 @@
 import { AppDataSource } from "../data-source";
 import { User } from "../entities/User";
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { BadRequestError, NotFoundError } from "../helpers/apiError";
 
 export class UserController {
@@ -36,6 +36,22 @@ export class UserController {
       return res
         .status(500)
         .json({ message: "Ocorreu um erro ao listar os usuários" });
+    }
+  }
+
+  async listById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id: number = Number(req.params.id);
+      if (isNaN(id)) {
+        throw new BadRequestError("ID inválido");
+      }
+      const user = await this.userRepository.findOneBy({ id });
+      if (!user) {
+        throw new NotFoundError("Usuário não encontrado");
+      }
+      res.status(200).json(user);
+    } catch (error: unknown) {
+      next(error);
     }
   }
 
