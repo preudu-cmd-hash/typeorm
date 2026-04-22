@@ -3,6 +3,7 @@ import { Post } from "../entities/Posts";
 import { User } from "../entities/User";
 import type { Request, Response } from "express";
 import { BadRequestError, NotFoundError } from "../helpers/apiError";
+import { validate } from "class-validator";
 
 export class PostController {
   private postRepository = AppDataSource.getRepository(Post);
@@ -18,6 +19,11 @@ export class PostController {
       if (!user) throw new NotFoundError("Usuário não encontrado");
 
       const post = this.postRepository.create({ title, content, user });
+      const errors = await validate(post);
+      if (errors.length > 0) {
+        throw new BadRequestError("Falha de validação");
+      }
+
       await this.postRepository.save(post);
     } catch (error: unknown) {
       if (error instanceof Error) {

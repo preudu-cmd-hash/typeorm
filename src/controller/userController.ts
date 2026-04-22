@@ -2,6 +2,7 @@ import { AppDataSource } from "../data-source";
 import { User } from "../entities/User";
 import type { NextFunction, Request, Response } from "express";
 import { BadRequestError, NotFoundError } from "../helpers/apiError";
+import { validate } from "class-validator";
 
 export class UserController {
   private userRepository = AppDataSource.getRepository(User);
@@ -10,6 +11,11 @@ export class UserController {
     try {
       const { firstName, lastName } = req.body;
       const newUser = this.userRepository.create({ firstName, lastName });
+
+      const errors = await validate(newUser);
+      if (errors.length > 0) {
+        throw new BadRequestError("Falha de validação", errors);
+      }
 
       await this.userRepository.save(newUser);
       return res.status(201).json(newUser);
